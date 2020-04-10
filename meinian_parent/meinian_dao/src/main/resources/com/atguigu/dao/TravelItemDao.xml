@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.TravelItemDao">
+
+<!--  根据跟团游id查询所有自由行  List<TravelItem> findTravelItemListById(Integer id);-->
+    <select id="findTravelItemListById" parameterType="int" resultType="TravelItem">
+        select * from t_travelitem where id in (select travelitem_id from t_travelgroup_travelitem where travelgroup_id = #{id})
+    </select>
+
+<!-- 查询所有自由行   List<TravelItem> findAll();-->
+    <select id="findAll" resultType="TravelItem">
+        select * from t_travelitem
+    </select>
+
+<!--  根据id编辑更改自由行数据  void edit(TravelItem travelItem);-->
+    <update id="edit" parameterType="TravelItem">
+        update t_travelitem
+        <set>
+            <if test="code!=null and code.length>0">
+                code=#{code},
+            </if>
+            <if test="name!=null and name.length>0">
+                name=#{name},
+            </if>
+            <if test="sex!=null and sex.length>0">
+                sex=#{sex},
+            </if>
+            <if test="age!=null and age.length>0">
+                age=#{age},
+            </if>
+            <if test="price!=null">
+                price=#{price},
+            </if>
+            <if test="type!=null and type.length>0">
+                type=#{type},
+            </if>
+            <if test="attention!=null and attention.length>0">
+                attention=#{attention},
+            </if>
+            <if test="remark!=null and remark.length>0">
+                remark=#{remark},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+<!--  根据id查询自由行  TravelItem findById(Integer id);-->
+    <select id="findById" parameterType="int" resultType="TravelItem">
+        select * from t_travelitem where id = #{id}
+    </select>
+
+<!--  查询自由行id在中间表中是否存在数据  long findCountByTravelItemItemId(Integer id);-->
+    <select id="findCountByTravelItemItemId" parameterType="Integer" resultType="Long">
+        select COUNT(*) from t_travelgroup_travelitem where travelitem_id = #{id}
+    </select>
+
+<!--  根据id删除自由行  void deleteById(Integer id);-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_travelitem where id = #{id}
+    </delete>
+
+<!--   分页查询 Page<TravelItem> findPage(String queryString);-->
+    <select id="findPage" parameterType="String" resultType="TravelItem">
+        select * from t_travelitem
+        <where>
+            <if test="value!=null and value.length>0">
+--             模糊查询
+                name like "%"#{value}"%" or code=#{value}
+            </if>
+        </where>
+    </select>
+    
+    <!--新增-->
+    <insert id="add" parameterType="travelItem">
+        insert into t_travelitem(code,name,sex,age,price,type,remark,attention)
+        values
+        (#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})
+    </insert>
+</mapper>

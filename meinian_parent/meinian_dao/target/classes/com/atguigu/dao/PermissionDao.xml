@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.PermissionDao">
+
+<!--  根据角色id查询中间表，获取对应的权限id，再用权限id查询对应权限信息，并封装为set  Set<Permission> findPermissionsByRoleId(Integer id);-->
+    <select id="findPermissionsByRoleId" resultType="Permission">
+        select * from t_permission where id in (select permission_id from t_role_permission where role_id = #{id})
+    </select>
+</mapper>

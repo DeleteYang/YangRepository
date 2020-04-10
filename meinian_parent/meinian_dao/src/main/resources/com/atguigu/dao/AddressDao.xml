@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.AddressDao">
+
+<!--  新增分公司地址  void addAddress(Address address);-->
+    <insert id="addAddress" parameterType="Address">
+        insert into t_address(addressName,lng,lat) values (#{addressName},#{lng},#{lat})
+    </insert>
+
+    <!--   删除分公司地址 void deleteById(Integer id);-->
+    <delete id="deleteById">
+        delete from t_address where id = #{id}
+    </delete>
+
+    <!-- 查找所有公司的地址和经纬度   List<Address> findAll();-->
+    <select id="findAll" resultType="com.atguigu.pojo.Address">
+        select * from t_address
+    </select>
+
+<!--  分页查询  Page<Address> selectByCondition(String queryString);-->
+    <select id="selectByCondition" resultType="com.atguigu.pojo.Address">
+        select * from t_address
+        <where>
+            <if test="value!=null and value.length>0">
+                addressName like concat('%',#{value},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

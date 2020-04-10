@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.OrdersettingDao">
+
+<!--  根据日期查询预约情况  List<OrderSetting> getOrderSettingByMonth(HashMap<String, Object> map);-->
+    <select id="getOrderSettingByMonth" resultType="OrderSetting" parameterType="map">
+        select * from t_ordersetting where orderDate between #{dateBegin} and #{dateEnd}
+    </select>
+
+<!--  添加预约信息  void add(OrderSetting orderSetting);-->
+    <insert id="add" parameterType="OrderSetting">
+        insert into t_ordersetting(orderDate,number,reservations) values (#{orderDate},#{number},#{reservations})
+    </insert>
+
+<!--  根据预约日期修改  void editNumberByOrderDate(OrderSetting orderSetting);-->
+    <update id="editNumberByOrderDate" parameterType="OrderSetting">
+        update t_ordersetting set number = #{number} where orderDate = #{orderDate}
+    </update>
+
+<!--  修改已预约人数  void editReservationsByOrderDate(OrderSetting orderSetting);-->
+    <update id="editReservationsByOrderDate" parameterType="OrderSetting">
+        update t_ordersetting set reservations = #{reservations} where orderDate = #{orderDate}
+    </update>
+
+    <!--  根据预约日期查询  long findCountByOrderDate(Date orderDate);-->
+    <select id="findCountByOrderDate" parameterType="java.util.Date" resultType="long">
+        select count(1) from t_ordersetting where orderDate = #{orderDate}
+    </select>
+<!--  根据日期查询此日期是否在预约表中已设置可预约  OrderSetting findByOrderDate(Date date);-->
+    <select id="findByOrderDate" resultType="com.atguigu.pojo.OrderSetting">
+        select * from t_ordersetting where orderDate = #{date}
+    </select>
+</mapper>

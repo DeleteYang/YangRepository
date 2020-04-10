@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.MemberDao">
+
+<!--  添加会员  void add(Member member);-->
+    <insert id="add" parameterType="Member">
+        <selectKey resultType="integer" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into t_member(fileNumber,name,sex,idCard,phoneNumber,regTime,password,email,birthday,remark) VALUES(#{fileNumber},#{name},#{sex},#{idCard},#{phoneNumber},#{regTime},#{password},#{email},#{birthday},#{remark})
+    </insert>
+    <!--  根据手机号查询会员信息（唯一）  Member findByTelephone(String telephone);-->
+    <select id="findByTelephone" resultType="com.atguigu.pojo.Member">
+        select * from t_member where phoneNumber = #{telephone}
+    </select>
+
+<!--  根据订单id查询旅人名member 旅游套餐名setmeal 旅游日期orderDate 预约类型orderType Map findById4Detail(Integer id);-->
+    <select id="findById4Detail" resultType="java.util.Map" parameterType="map">
+        select o.orderDate orderDate,o.orderType orderType,m.name member,s.name setmeal
+        from t_order o,t_member m,t_setmeal s
+        where o.setmeal_id = s.id and o.member_id = m.id and o.id = #{id}
+    </select>
+
+<!--    根据日期统计会员数，统计指定日期之前的会员数-->
+    <select id="findMemberCountBeforeDate" resultType="java.lang.Integer">
+        select count(1) from t_member where regTime &lt;= #{dayOfMonth}
+    </select>
+
+<!--  今日新增会员数  int getTodayNEwMember(String today);-->
+    <select id="getTodayNEwMember" resultType="java.lang.Integer">
+        select count(id) from t_member where regTime = #{today}
+    </select>
+
+<!--    总会员数-->
+    <select id="getTotalMember" resultType="java.lang.Integer">
+        select count(id) from t_member
+    </select>
+
+<!-- 本周/本月新增会员数   -->
+    <select id="getThisWeekAndMonthNewMember" resultType="java.lang.Integer">
+        select count(id) from t_member where regTime &gt;=#{date}
+    </select>
+
+</mapper>

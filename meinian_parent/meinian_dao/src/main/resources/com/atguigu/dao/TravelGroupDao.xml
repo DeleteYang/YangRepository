@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.TravelGroupDao">
+
+    <resultMap id="findByIdResultMap" type="TravelGroup">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <collection property="travelItems" column="id" select="com.atguigu.dao.TravelItemDao.findTravelItemListById"/>
+    </resultMap>
+
+<!--  根据套餐id查询跟团游信息  List<TravelGroup> findTravelGroupListById(Integer id);-->
+<!--    #         select c.* from t_travelgroup c,t_travelgroup_travelitem sc where c.id = sc.travelgroup_id and sc.travelitem_id = #{id}-->
+    <select id="findTravelGroupListById" parameterType="int" resultMap="findByIdResultMap">
+        select * from t_travelgroup where id in (select travelgroup_id from t_setmeal_travelgroup where setmeal_id = #{id})
+    </select>
+
+<!--   查询所有跟团游  List<TravelGroup> findAll();-->
+    <select id="findAll" resultType="TravelGroup">
+        select * from t_travelgroup
+    </select>
+
+<!-- 根据id修改组团游   void edit(TravelGroup travelGroup);-->
+    <update id="edit" parameterType="TravelGroup">
+        update t_travelgroup
+        <set>
+            <if test="code!=null and code.length>0">code = #{code},</if>
+            <if test="name!=null and name.length>0">name = #{name},</if>
+            <if test="helpCode!=null and helpCode.length>0">helpCode = #{helpCode},</if>
+            <if test="sex!=null and sex.length>0">sex = #{sex},</if>
+            <if test="remark!=null and remark.length>0">remark = #{remark},</if>
+            <if test="attention!=null and attention.length>0">attention = #{attention},</if>
+        </set>
+            where id = #{id}
+    </update>
+
+<!--  根据组团游id删除中间表中的数据  void deleteTravelGroupAndTravelItemByTravelGroupId(Integer id);-->
+    <delete id="deleteTravelGroupAndTravelItemByTravelGroupId" parameterType="int">
+        delete from t_travelgroup_travelitem where travelgroup_id = #{id}
+    </delete>
+
+<!--  根据组团游id查询信息  TravelGroup findById(Integer id);-->
+    <select id="findById" parameterType="int" resultType="TravelGroup">
+        select * from t_travelgroup where id = #{id}
+    </select>
+
+<!--  查询中间表与此组团游id相关的自由行id  List<Integer> findTravelItemIdByTravelgroupId(Integer id);-->
+    <select id="findTravelItemIdByTravelgroupId" parameterType="int" resultType="Integer">
+        select travelitem_id from t_travelgroup_travelitem where travelgroup_id = #{id}
+    </select>
+
+<!--  分页查询，  Page<TravelGroup> findPage(String queryString);-->
+    <select id="findPage" parameterType="String" resultType="TravelGroup">
+        select * from t_travelgroup
+        <where>
+            <if test="value != null and value.length > 0">
+                <!-- concat: 在mysql的语法中，表示字符串的连接符，like %#{value}%-->
+                code = #{value} or helpCode = #{value} or name like concat('%',#{value},'%')
+            </if>
+        </where>
+    </select>
+
+<!--  添加抱团游并获取其自增id  void add(TravelGroup travelGroup);-->
+<insert id="add" parameterType="TravelGroup">
+# order="AFTER" 执行顺序
+# select last_insert_id() 插入之后查询id，只能用于自增的id上
+# keyProperty="id" 查询出来的id 设置到parameterType类型的JavaBean中的哪个属性
+    <selectKey resultType="int" keyProperty="id" order="AFTER">
+        select last_insert_id()
+    </selectKey>
+    insert into t_travelgroup(id,code,name,helpCode,sex,remark,attention) values (#{id},#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+</insert>
+
+<!--  插入中间表  void setCheckGroupAndCheckItem(HashMap<String, Integer> map);-->
+    <insert id="setCheckGroupAndCheckItem" parameterType="map">
+        insert into t_travelgroup_travelitem(travelgroup_id,travelitem_id) values (#{travelGroupId},#{travelItemId})
+    </insert>
+</mapper>

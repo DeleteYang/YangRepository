@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.OrderDao">
+
+<!--  添加预约信息  void add(Order order);-->
+    <insert id="add" parameterType="Order">
+        <selectKey resultType="integer" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into t_order(member_id, orderDate, orderType, orderStatus, setmeal_id) VALUES (#{memberId},#{orderDate},#{orderType},#{orderStatus},#{setmealId})
+    </insert>
+
+    <!--  根据预约信息查询  Integer findByCondition(Order order);-->
+    <select id="findByCondition" resultType="java.lang.Integer" parameterType="Order">
+        select count(1) from t_order
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="member_id != null">
+                and member_id = #{memberId}
+            </if>
+            <if test="orderDate != null">
+                and orderDate = #{orderDate}
+            </if>
+            <if test="orderType != null">
+                and orderType = #{orderType}
+            </if>
+            <if test="orderStatus != null">
+                and orderStatus = #{orderStatus}
+            </if>
+            <if test="setmeal_id != null">
+                and setmeal_id = #{setmealId}
+            </if>
+        </where>
+    </select>
+
+<!--    今日预约数-->
+    <select id="getTodayOrderNumber" resultType="java.lang.Integer">
+        select count(id) from t_order where orderDate = #{today}
+    </select>
+
+<!--    今日出游数-->
+    <select id="getTodayVisitsNumber" resultType="java.lang.Integer">
+        select count(id) from t_order where orderStatus = '已出游' and orderDate = #{today}
+    </select>
+
+<!--    本周/本月预约数-->
+    <select id="getThisWeekAndMonthOrderNumber" resultType="java.lang.Integer" parameterType="map">
+        select COUNT(id) from t_order where orderDate between #{begin} and #{end}
+    </select>
+
+<!--    本周/本月出游数-->
+    <select id="getThisWeekAndMonthVisitsNumber" resultType="java.lang.Integer" parameterType="map">
+        select COUNT(id) from t_order where orderStatus = '已出游' and orderDate between #{begin} and #{end}
+    </select>
+
+<!--    热门套餐-->
+    <select id="findHotSetmeal" resultType="java.util.Map">
+        select s.name name,count(o.id) setmeal_count,count(o.id)/(select count(id) from t_order) proportion
+        from t_setmeal s,t_order o
+        where s.id = o.setmeal_id
+        group by s.name
+        order by setmeal_count desc
+        limit 0,4
+
+    </select>
+</mapper>
